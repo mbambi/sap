@@ -1,0 +1,14 @@
+{
+  "name": "mbambi/sap-php",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "firebase/php-jwt": "^6.10",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}

@@ -11,9 +11,7 @@ coverage/
 .turbo/
 
 # Keep only server/ and Render deployment files in GitHub
-# Exclude client development files
-client/
-DEPLOY.md
+# Keep both server and client in GitHub
 .vscode/
 .idea/
 *.swp

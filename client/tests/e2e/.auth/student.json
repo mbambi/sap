@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "https://bahlaq.com",
+      "localStorage": [
+        {
+          "name": "erp_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxOGZmZGVjNi0wMzAxLTQxNmMtYTk3Yy0xYmNlZWM2M2Q4NzUiLCJ0ZW5hbnRJZCI6IjQzZWZhMzc4LTI3YzktNDNjMC1iMDEzLTM2ODBiN2Q1NTI2NSIsImVtYWlsIjoicGxheXdyaWdodEB0ZXN0LmVkdSIsInJvbGVzIjpbXSwiaWF0IjoxNzczMzE1NDkwLCJleHAiOjE3NzMzNDQyOTB9.sdj81EalsQOhmfXXZTQxTgf6LQaV1zx68CdZBXJZ4z8"
+        }
+      ]
+    }
+  ]
+}

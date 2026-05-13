@@ -1,0 +1,224 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e10]:
+        - heading "SAP ERP" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Learning Platform
+    - navigation [ref=e13]:
+      - link "Dashboard" [ref=e14] [cursor=pointer]:
+        - /url: /
+        - img [ref=e15]
+        - text: Dashboard
+      - button "Finance (FI)" [ref=e21] [cursor=pointer]:
+        - img [ref=e22]
+        - generic [ref=e24]: Finance (FI)
+        - img [ref=e25]
+      - button "Controlling (CO)" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e31]: Controlling (CO)
+        - img [ref=e32]
+      - button "Materials (MM)" [ref=e35] [cursor=pointer]:
+        - img [ref=e36]
+        - generic [ref=e40]: Materials (MM)
+        - img [ref=e41]
+      - button "Sales (SD)" [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - generic [ref=e49]: Sales (SD)
+        - img [ref=e50]
+      - button "Production (PP)" [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+        - generic [ref=e56]: Production (PP)
+        - img [ref=e57]
+      - button "Warehouse (WM)" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+        - generic [ref=e64]: Warehouse (WM)
+        - img [ref=e65]
+      - button "Quality (QM)" [ref=e68] [cursor=pointer]:
+        - img [ref=e69]
+        - generic [ref=e73]: Quality (QM)
+        - img [ref=e74]
+      - button "Maintenance (PM)" [ref=e77] [cursor=pointer]:
+        - img [ref=e78]
+        - generic [ref=e80]: Maintenance (PM)
+        - img [ref=e81]
+      - button "MRP & Planning" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+        - generic [ref=e95]: MRP & Planning
+        - img [ref=e96]
+      - link "Transport" [ref=e98] [cursor=pointer]:
+        - /url: /transport
+        - img [ref=e99]
+        - text: Transport
+      - button "Supply Chain" [ref=e105] [cursor=pointer]:
+        - img [ref=e106]
+        - generic [ref=e111]: Supply Chain
+        - img [ref=e112]
+      - link "Process Flows" [ref=e114] [cursor=pointer]:
+        - /url: /process-flows
+        - img [ref=e115]
+        - text: Process Flows
+      - link "Process Visualizer" [ref=e119] [cursor=pointer]:
+        - /url: /process-visualizer
+        - img [ref=e120]
+        - text: Process Visualizer
+      - link "Digital Twin" [ref=e122] [cursor=pointer]:
+        - /url: /digital-twin
+        - img [ref=e123]
+        - text: Digital Twin
+      - button "Finance Ops" [ref=e131] [cursor=pointer]:
+        - img [ref=e132]
+        - generic [ref=e135]: Finance Ops
+        - img [ref=e136]
+      - link "Reporting" [ref=e138] [cursor=pointer]:
+        - /url: /reporting
+        - img [ref=e139]
+        - text: Reporting
+      - link "Process Mining" [ref=e142] [cursor=pointer]:
+        - /url: /process-mining
+        - img [ref=e143]
+        - text: Process Mining
+      - link "Scenario Simulator" [ref=e147] [cursor=pointer]:
+        - /url: /scenarios/simulator
+        - img [ref=e148]
+        - text: Scenario Simulator
+      - button "Workflow" [ref=e151] [cursor=pointer]:
+        - img [ref=e152]
+        - generic [ref=e156]: Workflow
+        - img [ref=e157]
+      - button "Analytics & BI" [ref=e160] [cursor=pointer]:
+        - img [ref=e161]
+        - generic [ref=e165]: Analytics & BI
+        - img [ref=e166]
+      - link "Documents" [ref=e168] [cursor=pointer]:
+        - /url: /documents
+        - img [ref=e169]
+        - text: Documents
+      - button "Learning" [ref=e173] [cursor=pointer]:
+        - img [ref=e174]
+        - generic [ref=e177]: Learning
+        - img [ref=e178]
+      - link "Gamification" [ref=e180] [cursor=pointer]:
+        - /url: /gamification
+        - img [ref=e181]
+        - text: Gamification
+      - link "Supply Chain Game" [ref=e187] [cursor=pointer]:
+        - /url: /game
+        - img [ref=e188]
+        - text: Supply Chain Game
+      - link "Benchmark" [ref=e190] [cursor=pointer]:
+        - /url: /benchmark
+        - img [ref=e191]
+        - text: Benchmark
+      - link "Stress Test" [ref=e195] [cursor=pointer]:
+        - /url: /stress-test
+        - img [ref=e196]
+        - text: Stress Test
+      - link "Event Bus" [ref=e198] [cursor=pointer]:
+        - /url: /event-bus
+        - img [ref=e199]
+        - text: Event Bus
+      - link "Simulation" [ref=e201] [cursor=pointer]:
+        - /url: /simulation
+        - img [ref=e202]
+        - text: Simulation
+      - link "Experiment Lab" [ref=e207] [cursor=pointer]:
+        - /url: /experiment-lab
+        - img [ref=e208]
+        - text: Experiment Lab
+      - link "Scenario Replay" [ref=e210] [cursor=pointer]:
+        - /url: /scenario-replay
+        - img [ref=e211]
+        - text: Scenario Replay
+      - link "AI Recommendations" [ref=e213] [cursor=pointer]:
+        - /url: /recommendations
+        - img [ref=e214]
+        - text: AI Recommendations
+      - link "ERP Copilot" [ref=e224] [cursor=pointer]:
+        - /url: /copilot
+        - img [ref=e225]
+        - text: ERP Copilot
+      - link "Time Machine" [ref=e228] [cursor=pointer]:
+        - /url: /time-machine
+        - img [ref=e229]
+        - text: Time Machine
+      - link "Simulator" [ref=e232] [cursor=pointer]:
+        - /url: /simulator
+        - img [ref=e233]
+        - text: Simulator
+      - link "ERP Explainer" [ref=e235] [cursor=pointer]:
+        - /url: /explainer
+        - img [ref=e236]
+        - text: ERP Explainer
+      - link "Costing" [ref=e239] [cursor=pointer]:
+        - /url: /costing
+        - img [ref=e240]
+        - text: Costing
+      - button "Utilities" [ref=e243] [cursor=pointer]:
+        - img [ref=e244]
+        - generic [ref=e246]: Utilities
+        - img [ref=e247]
+      - link "Audit" [ref=e249] [cursor=pointer]:
+        - /url: /audit
+        - img [ref=e250]
+        - text: Audit
+    - generic [ref=e254]: v3.0.0 · Enterprise Edition
+  - generic [ref=e255]:
+    - banner [ref=e256]:
+      - button "Search anything... Ctrl+K" [ref=e259] [cursor=pointer]:
+        - img [ref=e260]
+        - generic [ref=e263]: Search anything...
+        - generic [ref=e264]: Ctrl+K
+      - generic [ref=e265]:
+        - button "Help" [ref=e266] [cursor=pointer]:
+          - img [ref=e267]
+        - button "Notifications" [ref=e271] [cursor=pointer]:
+          - img [ref=e272]
+        - button "TS Test Student" [ref=e276] [cursor=pointer]:
+          - generic [ref=e278]: TS
+          - generic [ref=e279]:
+            - paragraph [ref=e280]: Test Student
+            - paragraph
+    - main [ref=e281]:
+      - generic [ref=e283]:
+        - img [ref=e285]
+        - generic [ref=e287]:
+          - heading "Experiment Lab" [level=3] [ref=e288]
+          - paragraph [ref=e289]: "Research-grade simulation experiments: compare inventory policies (EOQ vs (s,S)), lot sizing methods, safety stock trade-offs, bullwhip effect, and scheduling rules. Export results for academic papers."
+      - generic [ref=e290]:
+        - generic [ref=e293]:
+          - heading "ERP Experiment Lab" [level=1] [ref=e294]
+          - paragraph [ref=e295]: Run controlled experiments for research-grade analysis
+        - generic [ref=e296]:
+          - generic [ref=e297]:
+            - generic [ref=e298]:
+              - heading "Experiment Templates" [level=3] [ref=e299]
+              - generic [ref=e300]:
+                - button "EOQ vs (s,S) Policy inventory" [ref=e301] [cursor=pointer]:
+                  - generic [ref=e302]: EOQ vs (s,S) Policy
+                  - generic [ref=e303]: inventory
+                - button "Lot Sizing Comparison mrp" [ref=e304] [cursor=pointer]:
+                  - generic [ref=e305]: Lot Sizing Comparison
+                  - generic [ref=e306]: mrp
+                - button "Safety Stock vs Service Level inventory" [ref=e307] [cursor=pointer]:
+                  - generic [ref=e308]: Safety Stock vs Service Level
+                  - generic [ref=e309]: inventory
+                - button "Bullwhip Effect Simulation supply_chain" [ref=e310] [cursor=pointer]:
+                  - generic [ref=e311]: Bullwhip Effect Simulation
+                  - generic [ref=e312]: supply_chain
+                - button "Scheduling Rule Comparison production" [ref=e313] [cursor=pointer]:
+                  - generic [ref=e314]: Scheduling Rule Comparison
+                  - generic [ref=e315]: production
+            - button "Show History" [ref=e316] [cursor=pointer]:
+              - img [ref=e317]
+              - text: Show History
+          - generic [ref=e322]:
+            - img [ref=e323]
+            - paragraph [ref=e325]: Select an experiment template to begin
+  - button "Expand collaboration panel" [ref=e328] [cursor=pointer]:
+    - img [ref=e330]
+    - img [ref=e335]
+```

@@ -1,0 +1,256 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e10]:
+        - heading "SAP ERP" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Learning Platform
+    - navigation [ref=e13]:
+      - link "Dashboard" [ref=e14] [cursor=pointer]:
+        - /url: /
+        - img [ref=e15]
+        - text: Dashboard
+      - button "Finance (FI)" [ref=e21] [cursor=pointer]:
+        - img [ref=e22]
+        - generic [ref=e24]: Finance (FI)
+        - img [ref=e25]
+      - button "Controlling (CO)" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e31]: Controlling (CO)
+        - img [ref=e32]
+      - button "Materials (MM)" [ref=e35] [cursor=pointer]:
+        - img [ref=e36]
+        - generic [ref=e40]: Materials (MM)
+        - img [ref=e41]
+      - button "Sales (SD)" [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - generic [ref=e49]: Sales (SD)
+        - img [ref=e50]
+      - button "Production (PP)" [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+        - generic [ref=e56]: Production (PP)
+        - img [ref=e57]
+      - button "Warehouse (WM)" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+        - generic [ref=e64]: Warehouse (WM)
+        - img [ref=e65]
+      - button "Quality (QM)" [ref=e68] [cursor=pointer]:
+        - img [ref=e69]
+        - generic [ref=e73]: Quality (QM)
+        - img [ref=e74]
+      - button "Maintenance (PM)" [ref=e77] [cursor=pointer]:
+        - img [ref=e78]
+        - generic [ref=e80]: Maintenance (PM)
+        - img [ref=e81]
+      - button "MRP & Planning" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+        - generic [ref=e95]: MRP & Planning
+        - img [ref=e96]
+      - link "Transport" [ref=e98] [cursor=pointer]:
+        - /url: /transport
+        - img [ref=e99]
+        - text: Transport
+      - button "Supply Chain" [ref=e105] [cursor=pointer]:
+        - img [ref=e106]
+        - generic [ref=e111]: Supply Chain
+        - img [ref=e112]
+      - link "Process Flows" [ref=e114] [cursor=pointer]:
+        - /url: /process-flows
+        - img [ref=e115]
+        - text: Process Flows
+      - link "Process Visualizer" [ref=e119] [cursor=pointer]:
+        - /url: /process-visualizer
+        - img [ref=e120]
+        - text: Process Visualizer
+      - link "Digital Twin" [ref=e122] [cursor=pointer]:
+        - /url: /digital-twin
+        - img [ref=e123]
+        - text: Digital Twin
+      - button "Finance Ops" [ref=e131] [cursor=pointer]:
+        - img [ref=e132]
+        - generic [ref=e135]: Finance Ops
+        - img [ref=e136]
+      - link "Reporting" [ref=e138] [cursor=pointer]:
+        - /url: /reporting
+        - img [ref=e139]
+        - text: Reporting
+      - link "Process Mining" [ref=e142] [cursor=pointer]:
+        - /url: /process-mining
+        - img [ref=e143]
+        - text: Process Mining
+      - link "Scenario Simulator" [ref=e147] [cursor=pointer]:
+        - /url: /scenarios/simulator
+        - img [ref=e148]
+        - text: Scenario Simulator
+      - button "Workflow" [ref=e151] [cursor=pointer]:
+        - img [ref=e152]
+        - generic [ref=e156]: Workflow
+        - img [ref=e157]
+      - generic [ref=e159]:
+        - button "Analytics & BI" [ref=e160] [cursor=pointer]:
+          - img [ref=e161]
+          - generic [ref=e165]: Analytics & BI
+          - img [ref=e166]
+        - generic [ref=e168]:
+          - link "Data Warehouse" [ref=e169] [cursor=pointer]:
+            - /url: /data-warehouse
+          - link "Data Export Lab" [ref=e170] [cursor=pointer]:
+            - /url: /data-lab
+          - link "Optimization Engine" [ref=e171] [cursor=pointer]:
+            - /url: /optimization
+          - link "Decision Impact" [ref=e172] [cursor=pointer]:
+            - /url: /decision-impact
+          - link "SQL Explorer" [ref=e173] [cursor=pointer]:
+            - /url: /sql-explorer
+          - link "Role Dashboard" [ref=e174] [cursor=pointer]:
+            - /url: /role-dashboard
+      - link "Documents" [ref=e175] [cursor=pointer]:
+        - /url: /documents
+        - img [ref=e176]
+        - text: Documents
+      - button "Learning" [ref=e180] [cursor=pointer]:
+        - img [ref=e181]
+        - generic [ref=e184]: Learning
+        - img [ref=e185]
+      - link "Gamification" [ref=e187] [cursor=pointer]:
+        - /url: /gamification
+        - img [ref=e188]
+        - text: Gamification
+      - link "Supply Chain Game" [ref=e194] [cursor=pointer]:
+        - /url: /game
+        - img [ref=e195]
+        - text: Supply Chain Game
+      - link "Benchmark" [ref=e197] [cursor=pointer]:
+        - /url: /benchmark
+        - img [ref=e198]
+        - text: Benchmark
+      - link "Stress Test" [ref=e202] [cursor=pointer]:
+        - /url: /stress-test
+        - img [ref=e203]
+        - text: Stress Test
+      - link "Event Bus" [ref=e205] [cursor=pointer]:
+        - /url: /event-bus
+        - img [ref=e206]
+        - text: Event Bus
+      - link "Simulation" [ref=e208] [cursor=pointer]:
+        - /url: /simulation
+        - img [ref=e209]
+        - text: Simulation
+      - link "Experiment Lab" [ref=e214] [cursor=pointer]:
+        - /url: /experiment-lab
+        - img [ref=e215]
+        - text: Experiment Lab
+      - link "Scenario Replay" [ref=e217] [cursor=pointer]:
+        - /url: /scenario-replay
+        - img [ref=e218]
+        - text: Scenario Replay
+      - link "AI Recommendations" [ref=e220] [cursor=pointer]:
+        - /url: /recommendations
+        - img [ref=e221]
+        - text: AI Recommendations
+      - link "ERP Copilot" [ref=e231] [cursor=pointer]:
+        - /url: /copilot
+        - img [ref=e232]
+        - text: ERP Copilot
+      - link "Time Machine" [ref=e235] [cursor=pointer]:
+        - /url: /time-machine
+        - img [ref=e236]
+        - text: Time Machine
+      - link "Simulator" [ref=e239] [cursor=pointer]:
+        - /url: /simulator
+        - img [ref=e240]
+        - text: Simulator
+      - link "ERP Explainer" [ref=e242] [cursor=pointer]:
+        - /url: /explainer
+        - img [ref=e243]
+        - text: ERP Explainer
+      - link "Costing" [ref=e246] [cursor=pointer]:
+        - /url: /costing
+        - img [ref=e247]
+        - text: Costing
+      - button "Utilities" [ref=e250] [cursor=pointer]:
+        - img [ref=e251]
+        - generic [ref=e253]: Utilities
+        - img [ref=e254]
+      - link "Audit" [ref=e256] [cursor=pointer]:
+        - /url: /audit
+        - img [ref=e257]
+        - text: Audit
+    - generic [ref=e261]: v3.0.0 · Enterprise Edition
+  - generic [ref=e262]:
+    - banner [ref=e263]:
+      - button "Search anything... Ctrl+K" [ref=e266] [cursor=pointer]:
+        - img [ref=e267]
+        - generic [ref=e270]: Search anything...
+        - generic [ref=e271]: Ctrl+K
+      - generic [ref=e272]:
+        - button "Help" [ref=e273] [cursor=pointer]:
+          - img [ref=e274]
+        - button "Notifications" [ref=e278] [cursor=pointer]:
+          - img [ref=e279]
+        - button "TS Test Student" [ref=e283] [cursor=pointer]:
+          - generic [ref=e285]: TS
+          - generic [ref=e286]:
+            - paragraph [ref=e287]: Test Student
+            - paragraph
+    - main [ref=e288]:
+      - generic [ref=e290]:
+        - img [ref=e292]
+        - generic [ref=e296]:
+          - heading "Optimization Engine" [level=3] [ref=e297]
+          - paragraph [ref=e298]: "Mathematical optimization algorithms (linear programming, heuristics) for supply chain and production decisions: network flow optimization, vehicle routing, production lot sizing, and inventory rebalancing across locations."
+      - generic [ref=e299]:
+        - complementary [ref=e300]:
+          - generic [ref=e301]:
+            - button "Warehouse Location" [ref=e302] [cursor=pointer]:
+              - img [ref=e303]
+              - text: Warehouse Location
+            - button "Production Scheduling" [ref=e306] [cursor=pointer]:
+              - img [ref=e307]
+              - text: Production Scheduling
+            - button "Inventory Policy" [ref=e310] [cursor=pointer]:
+              - img [ref=e311]
+              - text: Inventory Policy
+            - button "Transport Route" [ref=e315] [cursor=pointer]:
+              - img [ref=e316]
+              - text: Transport Route
+        - main [ref=e321]:
+          - generic [ref=e324]:
+            - heading "Optimization" [level=1] [ref=e325]
+            - paragraph [ref=e326]: Run optimization models for warehouse, production, inventory, and transport
+          - generic [ref=e327]:
+            - generic [ref=e328]:
+              - heading "Facilities" [level=3] [ref=e329]
+              - button "Add Facility" [ref=e330] [cursor=pointer]:
+                - img [ref=e331]
+                - text: Add Facility
+            - generic [ref=e332]:
+              - heading "Customers" [level=3] [ref=e333]
+              - button "Add Customer" [ref=e334] [cursor=pointer]:
+                - img [ref=e335]
+                - text: Add Customer
+            - generic [ref=e336]:
+              - generic [ref=e337]:
+                - generic [ref=e338]: "Max warehouses:"
+                - 'slider "Max warehouses: 3" [ref=e339]': "3"
+                - generic [ref=e340]: "3"
+              - button "Run Optimization" [disabled] [ref=e341]
+          - generic [ref=e342]:
+            - heading "Optimization History" [level=3] [ref=e343]
+            - table [ref=e344]:
+              - rowgroup [ref=e345]:
+                - row "Status Type Objective Runtime" [ref=e346]:
+                  - columnheader "Status" [ref=e347]
+                  - columnheader "Type" [ref=e348]
+                  - columnheader "Objective" [ref=e349]
+                  - columnheader "Runtime" [ref=e350]
+              - rowgroup [ref=e351]:
+                - row "No runs yet" [ref=e352]:
+                  - cell "No runs yet" [ref=e353]
+  - button "Expand collaboration panel" [ref=e356] [cursor=pointer]:
+    - img [ref=e358]
+    - img [ref=e363]
+```

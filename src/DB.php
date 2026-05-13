@@ -62,4 +62,36 @@ final class DB
     {
         return $this->pdo->lastInsertId();
     }
+
+    public function beginTransaction(): void
+    {
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->pdo->commit();
+    }
+
+    public function rollBack(): void
+    {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+    }
+
+    public function transaction(callable $callback): mixed
+    {
+        try {
+            $this->pdo->beginTransaction();
+            $result = $callback($this);
+            $this->pdo->commit();
+            return $result;
+        } catch (\Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
 }

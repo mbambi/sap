@@ -13,7 +13,6 @@ coverage/
 # Keep only server/ and Render deployment files in GitHub
 # Exclude client development files
 client/
-README.md
 DEPLOY.md
 .vscode/
 .idea/

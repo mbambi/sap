@@ -10,15 +10,16 @@ async function main() {
   // CORE SETUP
   // ═══════════════════════════════════════════════════════════════════
 
-  // Create ENSAK tenant
+  // Create ENSA Kenitra tenant
   const tenant = await prisma.tenant.upsert({
     where: { slug: "ensak" },
     update: {},
     create: {
-      name: "ENSAK",
+      name: "ENSA Kenitra",
       slug: "ensak",
-      university: "ENSAK — École Nationale des Sciences Appliquées de Khouribga",
-      description: "ERP Learning Platform for ENSAK students",
+      university: "ENSA Kenitra — École Nationale des Sciences Appliquées de Kénitra",
+      description: "ERP Learning Platform for ENSA Kenitra students",
+      isActive: true,
     },
   });
 

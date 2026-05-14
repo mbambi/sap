@@ -7,7 +7,7 @@ import { Package, ShoppingCart, Landmark, Users, TrendingUp, AlertTriangle } fro
 
 export default function ReportingDashboard() {
   const { data } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["reporting-dashboard"],
     queryFn: () => api.get("/reporting/dashboard"),
   });
 

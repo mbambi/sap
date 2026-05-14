@@ -10,11 +10,52 @@ require __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
-$origin = getenv('CORS_ORIGIN') ?: '*';
-header('Access-Control-Allow-Origin: ' . $origin);
+function buildAllowedOrigins(string $rawOrigins): array
+{
+    $origins = array_filter(array_map('trim', explode(',', $rawOrigins)));
+    return $origins === [] ? [] : array_values(array_unique($origins));
+}
+
+function isOriginAllowed(?string $requestOrigin, array $allowedOrigins): bool
+{
+    if ($requestOrigin === null || $requestOrigin === '') {
+        return true;
+    }
+    if (in_array('*', $allowedOrigins, true)) {
+        return true;
+    }
+    return in_array($requestOrigin, $allowedOrigins, true);
+}
+
+$requestId = bin2hex(random_bytes(8));
+$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? null;
+$allowedOrigins = buildAllowedOrigins((string) (getenv('CORS_ORIGIN') ?: 'http://localhost:5173,http://localhost:4173'));
+
+if (!isOriginAllowed($requestOrigin, $allowedOrigins)) {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Origin not allowed'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+$corsOrigin = $requestOrigin ?: ($allowedOrigins[0] ?? '');
+if ($corsOrigin !== '') {
+    header('Access-Control-Allow-Origin: ' . $corsOrigin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+header('Content-Security-Policy: default-src \'none\'; frame-ancestors \'none\'; base-uri \'none\'');
+if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+header('Cache-Control: no-store');
+header('X-Request-Id: ' . $requestId);
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -23,7 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $rawBody = file_get_contents('php://input');
-$body = $rawBody ? json_decode($rawBody, true) : [];
+if ($rawBody !== '' && $rawBody !== false) {
+    $body = json_decode($rawBody, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        Router::json(['error' => 'Invalid JSON payload', 'requestId' => $requestId], 400);
+        exit;
+    }
+} else {
+    $body = [];
+}
 if (!is_array($body)) {
     $body = [];
 }
@@ -71,5 +120,6 @@ foreach ($handlerFiles as $file) {
 try {
     $router->dispatch($request['method'], $request['path']);
 } catch (Throwable $exception) {
-    Router::error('Internal server error', 500);
+    error_log(sprintf('[%s] Unhandled exception: %s', $requestId, $exception->getMessage()));
+    Router::json(['error' => 'Internal server error', 'requestId' => $requestId], 500);
 }

@@ -79,6 +79,19 @@ function materialsLoadPurchaseOrderItems(DB $db, string $poId): array
     return $rows;
 }
 
+function materialsHydrateVendor(array $row): ?array
+{
+    if (empty($row['vendorId'])) {
+        return null;
+    }
+
+    return [
+        'id' => $row['vendorId'],
+        'name' => $row['vendor_name'] ?? null,
+        'vendorNumber' => $row['vendor_number'] ?? null,
+    ];
+}
+
 function materialsLoadGoodsReceipts(DB $db, string $poId): array
 {
     $receipts = $db->query('SELECT * FROM `GoodsReceipt` WHERE poId = :poId ORDER BY createdAt DESC', ['poId' => $poId]);
@@ -437,14 +450,26 @@ $router->add('GET', '/api/materials/purchase-orders', function () use ($request)
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
     $rows = $db->query(
-        "SELECT po.* FROM `PurchaseOrder` po LEFT JOIN `Vendor` v ON po.vendorId = v.id $whereSql ORDER BY po.createdAt DESC LIMIT :limit OFFSET :offset",
+        "SELECT po.*,
+                v.name AS vendor_name,
+                v.vendorNumber AS vendor_number,
+                COUNT(poi.id) AS itemCount
+         FROM `PurchaseOrder` po
+         LEFT JOIN `Vendor` v ON po.vendorId = v.id
+         LEFT JOIN `PurchaseOrderItem` poi ON poi.poId = po.id
+         $whereSql
+         GROUP BY po.id
+         ORDER BY po.createdAt DESC
+         LIMIT :limit OFFSET :offset",
         $params + ['limit' => $limit, 'offset' => $offset]
     );
 
-    foreach ($rows as &$row) {
-        $row['vendor'] = materialsLoadVendor($db, $row['vendorId']);
-        $row['items'] = materialsLoadPurchaseOrderItems($db, $row['id']);
-    }
+    $rows = array_map(function ($row) {
+        $row['vendor'] = materialsHydrateVendor($row);
+        $row['itemCount'] = (int) ($row['itemCount'] ?? 0);
+        unset($row['vendor_name'], $row['vendor_number']);
+        return $row;
+    }, $rows);
 
     $countRows = $db->query("SELECT COUNT(*) AS total FROM `PurchaseOrder` po LEFT JOIN `Vendor` v ON po.vendorId = v.id $whereSql", $params);
     $total = (int) ($countRows[0]['total'] ?? 0);
@@ -559,7 +584,7 @@ $router->add('POST', '/api/materials/purchase-orders', function () use ($request
 });
 
 $router->add('POST', '/api/materials/purchase-orders/{id}/approve', function (array $params) {
-    $user = requireRoles([]);
+    $user = requireRoles(['admin', 'instructor']);
     $db = DB::getInstance();
 
     $rows = $db->query('SELECT * FROM `PurchaseOrder` WHERE id = :id LIMIT 1', ['id' => $params['id']]);
@@ -725,8 +750,9 @@ $router->add('GET', '/api/materials/inventory-movements', function () use ($requ
     $search = trim((string) ($query['search'] ?? ''));
     $filters = materialsFilters($query, ['movementType']);
 
-    $where = [];
+    $where = ['m.tenantId = :tenantId'];
     $params = [];
+    $params['tenantId'] = $user['tenantId'];
 
     if ($search !== '') {
         $where[] = '(reference LIKE :search OR movementType LIKE :search)';
@@ -734,22 +760,41 @@ $router->add('GET', '/api/materials/inventory-movements', function () use ($requ
     }
 
     foreach ($filters as $field => $value) {
-        $where[] = sprintf('`%s` = :%s', $field, $field);
+        $where[] = sprintf('im.`%s` = :%s', $field, $field);
         $params[$field] = $value;
     }
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
     $data = $db->query(
-        "SELECT * FROM `InventoryMovement` $whereSql ORDER BY createdAt DESC LIMIT :limit OFFSET :offset",
+        "SELECT im.*,
+                m.materialNumber AS material_materialNumber,
+                m.description AS material_description
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         $whereSql
+         ORDER BY im.createdAt DESC
+         LIMIT :limit OFFSET :offset",
         $params + ['limit' => $limit, 'offset' => $offset]
     );
 
-    foreach ($data as &$row) {
-        $row['material'] = materialsLoadMaterial($db, $row['materialId']);
-    }
+    $data = array_map(function ($row) {
+        $row['material'] = [
+            'id' => $row['materialId'],
+            'materialNumber' => $row['material_materialNumber'] ?? null,
+            'description' => $row['material_description'] ?? null,
+        ];
+        unset($row['material_materialNumber'], $row['material_description']);
+        return $row;
+    }, $data);
 
-    $countRows = $db->query("SELECT COUNT(*) AS total FROM `InventoryMovement` $whereSql", $params);
+    $countRows = $db->query(
+        "SELECT COUNT(*) AS total
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         $whereSql",
+        $params
+    );
     $total = (int) ($countRows[0]['total'] ?? 0);
 
     Router::json([
@@ -767,7 +812,14 @@ $router->add('GET', '/api/materials/inventory-movements/{id}', function (array $
     $user = requireRoles([]);
     $db = DB::getInstance();
 
-    $rows = $db->query('SELECT * FROM `InventoryMovement` WHERE id = :id LIMIT 1', ['id' => $params['id']]);
+    $rows = $db->query(
+        'SELECT im.*, m.materialNumber AS material_materialNumber, m.description AS material_description
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         WHERE im.id = :id AND m.tenantId = :tenantId
+         LIMIT 1',
+        ['id' => $params['id'], 'tenantId' => $user['tenantId']]
+    );
     $record = $rows[0] ?? null;
 
     if (!$record) {
@@ -775,7 +827,12 @@ $router->add('GET', '/api/materials/inventory-movements/{id}', function (array $
         return;
     }
 
-    $record['material'] = materialsLoadMaterial($db, $record['materialId']);
+    $record['material'] = [
+        'id' => $record['materialId'],
+        'materialNumber' => $record['material_materialNumber'] ?? null,
+        'description' => $record['material_description'] ?? null,
+    ];
+    unset($record['material_materialNumber'], $record['material_description']);
     Router::json($record);
 });
 
@@ -792,6 +849,15 @@ $router->add('POST', '/api/materials/inventory-movements', function () use ($req
     }
 
     $db = DB::getInstance();
+    $material = $db->query(
+        'SELECT id FROM `Material` WHERE id = :id AND tenantId = :tenantId LIMIT 1',
+        ['id' => $body['materialId'], 'tenantId' => $user['tenantId']]
+    )[0] ?? null;
+    if (!$material) {
+        Router::error('material not found', 404);
+        return;
+    }
+
     $id = generateUuid();
     $now = date('Y-m-d H:i:s');
 
@@ -828,7 +894,14 @@ $router->add('PUT', '/api/materials/inventory-movements/{id}', function (array $
     $user = requireRoles([]);
     $db = DB::getInstance();
 
-    $rows = $db->query('SELECT * FROM `InventoryMovement` WHERE id = :id LIMIT 1', ['id' => $params['id']]);
+    $rows = $db->query(
+        'SELECT im.*
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         WHERE im.id = :id AND m.tenantId = :tenantId
+         LIMIT 1',
+        ['id' => $params['id'], 'tenantId' => $user['tenantId']]
+    );
     $record = $rows[0] ?? null;
     if (!$record) {
         Router::error('inventory_movement not found', 404);
@@ -838,14 +911,36 @@ $router->add('PUT', '/api/materials/inventory-movements/{id}', function (array $
     $body = $request['body'] ?? [];
     $allowed = ['materialId', 'movementType', 'quantity', 'unit', 'fromLocation', 'toLocation', 'reference', 'reason'];
     [$fields, $paramsUpdate] = materialsBuildUpdate($body, $allowed);
+    if (isset($body['materialId'])) {
+        $material = $db->query(
+            'SELECT id FROM `Material` WHERE id = :id AND tenantId = :tenantId LIMIT 1',
+            ['id' => $body['materialId'], 'tenantId' => $user['tenantId']]
+        )[0] ?? null;
+        if (!$material) {
+            Router::error('material not found', 404);
+            return;
+        }
+    }
     if ($fields) {
         $paramsUpdate['id'] = $params['id'];
         $db->execute('UPDATE `InventoryMovement` SET ' . implode(', ', $fields) . ' WHERE id = :id', $paramsUpdate);
     }
 
-    $updated = $db->query('SELECT * FROM `InventoryMovement` WHERE id = :id LIMIT 1', ['id' => $params['id']])[0] ?? null;
+    $updated = $db->query(
+        'SELECT im.*, m.materialNumber AS material_materialNumber, m.description AS material_description
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         WHERE im.id = :id AND m.tenantId = :tenantId
+         LIMIT 1',
+        ['id' => $params['id'], 'tenantId' => $user['tenantId']]
+    )[0] ?? null;
     if ($updated) {
-        $updated['material'] = materialsLoadMaterial($db, $updated['materialId']);
+        $updated['material'] = [
+            'id' => $updated['materialId'],
+            'materialNumber' => $updated['material_materialNumber'] ?? null,
+            'description' => $updated['material_description'] ?? null,
+        ];
+        unset($updated['material_materialNumber'], $updated['material_description']);
         logAudit($user, 'materials', 'inventory_movement', 'UPDATE', $params['id'], $record, $updated);
         Router::json($updated);
         return;
@@ -858,7 +953,14 @@ $router->add('DELETE', '/api/materials/inventory-movements/{id}', function (arra
     $user = requireRoles([]);
     $db = DB::getInstance();
 
-    $rows = $db->query('SELECT * FROM `InventoryMovement` WHERE id = :id LIMIT 1', ['id' => $params['id']]);
+    $rows = $db->query(
+        'SELECT im.*
+         FROM `InventoryMovement` im
+         JOIN `Material` m ON m.id = im.materialId
+         WHERE im.id = :id AND m.tenantId = :tenantId
+         LIMIT 1',
+        ['id' => $params['id'], 'tenantId' => $user['tenantId']]
+    );
     $record = $rows[0] ?? null;
     if (!$record) {
         Router::error('inventory_movement not found', 404);
@@ -868,4 +970,60 @@ $router->add('DELETE', '/api/materials/inventory-movements/{id}', function (arra
     $db->execute('DELETE FROM `InventoryMovement` WHERE id = :id', ['id' => $params['id']]);
     logAudit($user, 'materials', 'inventory_movement', 'DELETE', $params['id'], $record, null);
     Router::json(['message' => 'inventory_movement deleted']);
+});
+
+// Goods receipts
+$router->add('GET', '/api/materials/goods-receipts', function () use ($request) {
+    $user = requireRoles([]);
+    $query = $request['query'] ?? [];
+    [$page, $limit, $offset] = materialsPagination($query);
+
+    $db = DB::getInstance();
+    $search = trim((string) ($query['search'] ?? ''));
+    $where = ['po.tenantId = :tenantId'];
+    $params = ['tenantId' => $user['tenantId']];
+
+    if ($search !== '') {
+        $where[] = '(gr.grNumber LIKE :search OR po.poNumber LIKE :search)';
+        $params['search'] = '%' . $search . '%';
+    }
+    $whereSql = 'WHERE ' . implode(' AND ', $where);
+
+    $rows = $db->query(
+        "SELECT gr.*,
+                po.poNumber,
+                COUNT(gri.id) AS itemCount
+         FROM `GoodsReceipt` gr
+         JOIN `PurchaseOrder` po ON po.id = gr.poId
+         LEFT JOIN `GoodsReceiptItem` gri ON gri.goodsReceiptId = gr.id
+         $whereSql
+         GROUP BY gr.id
+         ORDER BY gr.createdAt DESC
+         LIMIT :limit OFFSET :offset",
+        $params + ['limit' => $limit, 'offset' => $offset]
+    );
+
+    $rows = array_map(function ($row) {
+        $row['itemCount'] = (int) ($row['itemCount'] ?? 0);
+        return $row;
+    }, $rows);
+
+    $countRows = $db->query(
+        "SELECT COUNT(*) AS total
+         FROM `GoodsReceipt` gr
+         JOIN `PurchaseOrder` po ON po.id = gr.poId
+         $whereSql",
+        $params
+    );
+    $total = (int) ($countRows[0]['total'] ?? 0);
+
+    Router::json([
+        'data' => $rows,
+        'pagination' => [
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'totalPages' => (int) ceil($total / $limit),
+        ],
+    ]);
 });

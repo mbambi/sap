@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\DB;
 use App\Router;
 use function App\generateUuid;
+use function App\isStrongPassword;
+use function App\normalizeEmail;
 use function App\requireRoles;
 
 /** @var Router $router */
@@ -98,8 +100,13 @@ $router->add('POST', '/api/admin/users', function () use ($request) {
         Router::error('email, firstName, lastName required', 400);
         return;
     }
-    if (empty($body['password']) || strlen((string) $body['password']) < 6) {
-        Router::error('password is required and must be at least 6 characters', 400);
+    $email = normalizeEmail((string) $body['email']);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        Router::error('invalid email address', 400);
+        return;
+    }
+    if (empty($body['password']) || !isStrongPassword((string) $body['password'])) {
+        Router::error('password must be at least 10 chars and include uppercase, lowercase, number, and symbol', 400);
         return;
     }
 
@@ -112,7 +119,7 @@ $router->add('POST', '/api/admin/users', function () use ($request) {
         [
             'id' => $id,
             'tenantId' => $user['tenantId'],
-            'email' => $body['email'],
+            'email' => $email,
             'passwordHash' => $passwordHash,
             'firstName' => $body['firstName'],
             'lastName' => $body['lastName'],
@@ -141,7 +148,7 @@ $router->add('POST', '/api/admin/users', function () use ($request) {
         }
     }
 
-    Router::json(['id' => $id, 'email' => $body['email']], 201);
+    Router::json(['id' => $id, 'email' => $email], 201);
 });
 
 $router->add('PUT', '/api/admin/users/{id}/roles', function (array $params) use ($request) {

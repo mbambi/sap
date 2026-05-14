@@ -90,6 +90,7 @@ CREATE TABLE `PurchaseOrder` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `PurchaseOrder_tenantId_poNumber_key`(`tenantId`, `poNumber`),
+    INDEX `PurchaseOrder_tenantId_createdAt_idx`(`tenantId`, `createdAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -119,6 +120,7 @@ CREATE TABLE `GoodsReceipt` (
     `createdBy` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `GoodsReceipt_poId_createdAt_idx`(`poId`, `createdAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -148,6 +150,8 @@ CREATE TABLE `InventoryMovement` (
     `createdBy` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `InventoryMovement_materialId_createdAt_idx`(`materialId`, `createdAt`),
+    INDEX `InventoryMovement_movementType_createdAt_idx`(`movementType`, `createdAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

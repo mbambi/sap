@@ -105,7 +105,7 @@ export default function PurchaseOrders() {
           )},
           { key: "vendor", label: "Vendor", render: (r: any) => r.vendor?.name },
           { key: "orderDate", label: "Date", render: (r: any) => new Date(r.orderDate).toLocaleDateString() },
-          { key: "items", label: "Items", render: (r: any) => r.items?.length || 0 },
+          { key: "items", label: "Items", render: (r: any) => r.itemCount ?? r.items?.length || 0 },
           { key: "totalAmount", label: "Total", render: (r: any) => `$${(r.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
           { key: "status", label: "Status", render: (r: any) => <StatusBadge status={r.status} /> },
         ]}

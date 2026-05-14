@@ -7,18 +7,113 @@ use App\Router;
 use function App\generateToken;
 use function App\requireRoles;
 use function App\generateUuid;
+use function App\isStrongPassword;
+use function App\normalizeEmail;
 
 /** @var Router $router */
 /** @var array $request */
 
+function authRateStorePath(): string
+{
+    return sys_get_temp_dir() . '/sap_auth_rate_limit.json';
+}
+
+function authReadRateStore(): array
+{
+    $path = authRateStorePath();
+    if (!file_exists($path)) {
+        return [];
+    }
+
+    $content = file_get_contents($path);
+    if ($content === false || $content === '') {
+        return [];
+    }
+
+    $decoded = json_decode($content, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function authWriteRateStore(array $data): void
+{
+    file_put_contents(authRateStorePath(), json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+}
+
+function authRateKey(string $tenantSlug, string $email, string $ip): string
+{
+    return hash('sha256', strtolower($tenantSlug . '|' . $email . '|' . $ip));
+}
+
+function authIsLocked(string $tenantSlug, string $email, string $ip): bool
+{
+    $data = authReadRateStore();
+    $key = authRateKey($tenantSlug, $email, $ip);
+    $entry = $data[$key] ?? null;
+    if (!is_array($entry)) {
+        return false;
+    }
+
+    $now = time();
+    if (($entry['lockUntil'] ?? 0) > $now) {
+        return true;
+    }
+
+    if (($entry['lastAttemptAt'] ?? 0) < ($now - 3600)) {
+        unset($data[$key]);
+        authWriteRateStore($data);
+    }
+
+    return false;
+}
+
+function authRecordFailure(string $tenantSlug, string $email, string $ip): void
+{
+    $data = authReadRateStore();
+    $key = authRateKey($tenantSlug, $email, $ip);
+    $now = time();
+    $entry = $data[$key] ?? ['attempts' => 0, 'lockUntil' => 0, 'lastAttemptAt' => 0];
+
+    if (($entry['lastAttemptAt'] ?? 0) < ($now - 900)) {
+        $entry['attempts'] = 0;
+    }
+
+    $entry['attempts'] = (int) ($entry['attempts'] ?? 0) + 1;
+    $entry['lastAttemptAt'] = $now;
+    if ($entry['attempts'] >= 5) {
+        $entry['lockUntil'] = $now + 900;
+    }
+
+    $data[$key] = $entry;
+    authWriteRateStore($data);
+}
+
+function authResetFailures(string $tenantSlug, string $email, string $ip): void
+{
+    $data = authReadRateStore();
+    $key = authRateKey($tenantSlug, $email, $ip);
+    if (isset($data[$key])) {
+        unset($data[$key]);
+        authWriteRateStore($data);
+    }
+}
+
 $router->add('POST', '/api/auth/login', function () use ($request) {
     $body = $request['body'] ?? [];
-    $email = $body['email'] ?? null;
-    $password = $body['password'] ?? null;
-    $tenantSlug = $body['tenantSlug'] ?? null;
+    $email = normalizeEmail($body['email'] ?? null);
+    $password = (string) ($body['password'] ?? '');
+    $tenantSlug = trim((string) ($body['tenantSlug'] ?? ''));
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
 
-    if (!$email || !$password || !$tenantSlug) {
+    if ($email === '' || $password === '' || $tenantSlug === '') {
         Router::error('Invalid credentials', 400);
+        return;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-z0-9-]+$/i', $tenantSlug)) {
+        Router::error('Invalid credentials', 400);
+        return;
+    }
+    if (authIsLocked($tenantSlug, $email, $ip)) {
+        Router::error('Account temporarily locked due to failed login attempts', 429);
         return;
     }
 
@@ -26,6 +121,7 @@ $router->add('POST', '/api/auth/login', function () use ($request) {
     $tenantRows = $db->query('SELECT * FROM `Tenant` WHERE slug = :slug LIMIT 1', ['slug' => $tenantSlug]);
     $tenant = $tenantRows[0] ?? null;
     if (!$tenant || !(bool) $tenant['isActive']) {
+        authRecordFailure($tenantSlug, $email, $ip);
         Router::error('Invalid tenant or credentials', 401);
         return;
     }
@@ -36,11 +132,13 @@ $router->add('POST', '/api/auth/login', function () use ($request) {
     );
     $user = $userRows[0] ?? null;
     if (!$user || !(bool) $user['isActive']) {
+        authRecordFailure($tenantSlug, $email, $ip);
         Router::error('Invalid credentials', 401);
         return;
     }
 
     if (!password_verify($password, $user['passwordHash'])) {
+        authRecordFailure($tenantSlug, $email, $ip);
         Router::error('Invalid credentials', 401);
         return;
     }
@@ -58,7 +156,14 @@ $router->add('POST', '/api/auth/login', function () use ($request) {
         'roles' => $roles,
     ];
 
-    $token = generateToken($payload);
+    try {
+        $token = generateToken($payload);
+    } catch (\Throwable $exception) {
+        error_log('Token generation failed: ' . $exception->getMessage());
+        Router::error('Authentication service unavailable', 500);
+        return;
+    }
+    authResetFailures($tenantSlug, $email, $ip);
 
     $db->execute(
         'UPDATE `User` SET lastLogin = :lastLogin, updatedAt = :updatedAt WHERE id = :id',
@@ -85,13 +190,25 @@ $router->add('POST', '/api/auth/login', function () use ($request) {
 
 $router->add('POST', '/api/auth/register', function () use ($request) {
     $body = $request['body'] ?? [];
-    $email = $body['email'] ?? null;
-    $password = $body['password'] ?? null;
-    $firstName = $body['firstName'] ?? null;
-    $lastName = $body['lastName'] ?? null;
-    $tenantSlug = $body['tenantSlug'] ?? null;
+    $email = normalizeEmail($body['email'] ?? null);
+    $password = (string) ($body['password'] ?? '');
+    $firstName = trim((string) ($body['firstName'] ?? ''));
+    $lastName = trim((string) ($body['lastName'] ?? ''));
+    $tenantSlug = trim((string) ($body['tenantSlug'] ?? ''));
 
-    if (!$email || !$password || !$firstName || !$lastName || !$tenantSlug) {
+    if ($email === '' || $password === '' || $firstName === '' || $lastName === '' || $tenantSlug === '') {
+        Router::error('Invalid registration data', 400);
+        return;
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-z0-9-]+$/i', $tenantSlug)) {
+        Router::error('Invalid registration data', 400);
+        return;
+    }
+    if (!isStrongPassword($password)) {
+        Router::error('Password must be at least 10 chars and include uppercase, lowercase, number, and symbol', 400);
+        return;
+    }
+    if (strlen($firstName) > 80 || strlen($lastName) > 80) {
         Router::error('Invalid registration data', 400);
         return;
     }

@@ -49,6 +49,7 @@ CREATE TABLE `JournalEntry` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `JournalEntry_tenantId_companyCodeId_documentNumber_key`(`tenantId`, `companyCodeId`, `documentNumber`),
+    INDEX `JournalEntry_tenantId_status_createdAt_idx`(`tenantId`, `status`, `createdAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

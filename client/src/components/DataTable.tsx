@@ -13,6 +13,7 @@ interface Props<T> {
   data: T[];
   pagination?: { page: number; limit: number; total: number; totalPages: number };
   isLoading?: boolean;
+  error?: string | null;
   onPageChange?: (page: number) => void;
   onSearch?: (q: string) => void;
   onAdd?: () => void;
@@ -28,6 +29,7 @@ export default function DataTable<T extends Record<string, any>>({
   data,
   pagination,
   isLoading,
+  error,
   onPageChange,
   onSearch,
   onAdd,
@@ -49,14 +51,14 @@ export default function DataTable<T extends Record<string, any>>({
         {onSearch && (
           <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 flex-1 w-full sm:max-w-sm">
             <Search className="w-4 h-4 text-gray-400" />
-            <input
-              type="text"
+             <input
+                type="text"
               value={searchVal}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder={searchPlaceholder}
-              className="bg-transparent text-sm flex-1 outline-none"
-            />
-          </div>
+                className="bg-transparent text-sm flex-1 outline-none placeholder:text-gray-500"
+              />
+            </div>
         )}
         <div className="flex items-center gap-2 ml-auto">
           {actions}
@@ -69,7 +71,7 @@ export default function DataTable<T extends Record<string, any>>({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" role="table">
           <thead>
             <tr className="border-b bg-gray-50/50">
               {columns.map((col) => (
@@ -85,15 +87,21 @@ export default function DataTable<T extends Record<string, any>>({
           <tbody className="divide-y">
             {isLoading ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-600" role="status" aria-live="polite">
                   <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                   Loading...
                 </td>
               </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-red-700">
+                  Failed to load records. {error}
+                </td>
+              </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-400">
-                  No records found
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-500">
+                  No records found for the current filters.
                 </td>
               </tr>
             ) : (
@@ -101,7 +109,14 @@ export default function DataTable<T extends Record<string, any>>({
                 <tr
                   key={row.id || i}
                   onClick={() => onRowClick?.(row)}
-                  className={`hover:bg-gray-50 transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
+                  className={`hover:bg-gray-50 transition-colors ${onRowClick ? "cursor-pointer focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-700" : ""}`}
+                  tabIndex={onRowClick ? 0 : -1}
+                  onKeyDown={(e) => {
+                    if (onRowClick && (e.key === "Enter" || e.key === " ")) {
+                      e.preventDefault();
+                      onRowClick(row);
+                    }
+                  }}
                 >
                   {columns.map((col) => (
                     <td key={col.key} className={`px-4 py-3 ${col.className || ""}`}>

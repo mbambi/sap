@@ -104,16 +104,18 @@ A comprehensive web-based ERP platform that mirrors SAP's core functionality. De
 git clone <repo>
 cd sap
 
-# Backend
-cd server
-npm install
-cp ../.env.example ../.env
-npx prisma db push
-npx tsx src/seed.ts
-npx tsx src/index.ts
+# Backend (PHP)
+composer install
+cp .env.example .env
+mysql -u <user> -p <db> < migrations/auth.sql
+mysql -u <user> -p <db> < migrations/finance.sql
+mysql -u <user> -p <db> < migrations/materials.sql
+# ...apply remaining SQL files in /migrations
+php seed.php
+php -S localhost:8080 -t .
 
 # Frontend (new terminal)
-cd ../client
+cd client
 npm install
 npm run dev
 ```
@@ -133,9 +135,9 @@ npm run dev
 | Layer | Technology |
 |-------|------------|
 | **Frontend** | React 19, TypeScript, Vite, TailwindCSS, Zustand, TanStack Query, Recharts, Lucide React |
-| **Backend** | Node.js, Express, TypeScript, Prisma ORM |
-| **Database** | SQLite (dev) / PostgreSQL (prod) |
-| **Auth** | JWT, bcryptjs, RBAC middleware |
+| **Backend** | PHP 8+, custom router, PDO, firebase/php-jwt |
+| **Database** | MySQL/MariaDB |
+| **Auth** | JWT (HS256), bcrypt password hashes, RBAC middleware |
 
 ---
 
@@ -464,7 +466,7 @@ Pre-loaded demo data includes:
 
 ## API Endpoints
 
-All endpoints are REST, JSON, and require JWT authentication. Base URL: `http://localhost:3001/api`
+All endpoints are REST, JSON, and require JWT authentication. Base URL: `http://localhost:8080/api`
 
 | Prefix | Description |
 |--------|--------------|

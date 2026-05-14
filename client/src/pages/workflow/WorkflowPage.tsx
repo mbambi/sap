@@ -1,18 +1,35 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GitBranch, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react";
 import { api } from "../../api/client";
 import PageHeader from "../../components/PageHeader";
 import StatusBadge from "../../components/StatusBadge";
 
 export default function WorkflowPage() {
-  const { data: tasks = [] } = useQuery({
+  const queryClient = useQueryClient();
+  const { data: tasks = [], isLoading: tasksLoading, error: tasksError } = useQuery({
     queryKey: ["my-tasks"],
     queryFn: () => api.get("/workflow/my-tasks"),
   });
 
-  const { data: instances = [] } = useQuery({
+  const { data: instances = [], isLoading: instancesLoading } = useQuery({
     queryKey: ["workflow-instances"],
     queryFn: () => api.get("/workflow/instances"),
+  });
+
+  const approveTask = useMutation({
+    mutationFn: (id: string) => api.post(`/workflow/tasks/${id}/approve`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["workflow-instances"] });
+    },
+  });
+
+  const rejectTask = useMutation({
+    mutationFn: (id: string) => api.post(`/workflow/tasks/${id}/reject`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["workflow-instances"] });
+    },
   });
 
   return (
@@ -58,7 +75,11 @@ export default function WorkflowPage() {
             <h3 className="text-sm font-semibold">My Pending Tasks</h3>
           </div>
           <div className="divide-y">
-            {tasks.length === 0 ? (
+            {tasksLoading ? (
+              <div className="p-8 text-center text-sm text-gray-500">Loading tasks…</div>
+            ) : tasksError ? (
+              <div className="p-8 text-center text-sm text-red-700">Unable to load workflow tasks.</div>
+            ) : tasks.length === 0 ? (
               <div className="p-8 text-center text-sm text-gray-400">
                 <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-300" />
                 No pending tasks
@@ -72,8 +93,20 @@ export default function WorkflowPage() {
                     <p className="text-xs text-gray-500">Step {task.stepNumber + 1} — {task.action}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="btn-success btn-sm">Approve</button>
-                    <button className="btn-danger btn-sm">Reject</button>
+                    <button
+                      className="btn-success btn-sm"
+                      onClick={() => approveTask.mutate(task.id)}
+                      disabled={approveTask.isPending || rejectTask.isPending}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="btn-danger btn-sm"
+                      onClick={() => rejectTask.mutate(task.id)}
+                      disabled={approveTask.isPending || rejectTask.isPending}
+                    >
+                      Reject
+                    </button>
                   </div>
                 </div>
               ))
@@ -86,7 +119,9 @@ export default function WorkflowPage() {
             <h3 className="text-sm font-semibold">Workflow Instances</h3>
           </div>
           <div className="divide-y">
-            {instances.length === 0 ? (
+            {instancesLoading ? (
+              <div className="p-8 text-center text-sm text-gray-500">Loading instances…</div>
+            ) : instances.length === 0 ? (
               <div className="p-8 text-center text-sm text-gray-400">
                 No workflow instances yet
               </div>

@@ -41,7 +41,7 @@ export default function CrudPage({
   addLabel = "Add New",
   readOnly = false,
 }: CrudPageProps) {
-  const { data, pagination, isLoading, page, setPage, setSearch, create, update, remove } = useCrud({
+  const { data, pagination, isLoading, errorMessage, page, setPage, setSearch, create, update, remove } = useCrud({
     key: queryKey,
     endpoint,
   });
@@ -116,6 +116,7 @@ export default function CrudPage({
         data={data}
         pagination={pagination}
         isLoading={isLoading}
+        error={errorMessage}
         onPageChange={setPage}
         onSearch={setSearch}
         onAdd={readOnly ? undefined : openCreate}

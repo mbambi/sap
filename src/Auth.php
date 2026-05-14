@@ -7,6 +7,61 @@ namespace App;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
+function authConfig(): array
+{
+    $secret = trim((string) (getenv('JWT_SECRET') ?: ''));
+    if ($secret === '' || $secret === 'change-me' || strlen($secret) < 32) {
+        throw new \RuntimeException('JWT_SECRET must be configured with a secure value (min 32 chars)');
+    }
+
+    $expiryRaw = trim((string) (getenv('JWT_EXPIRY') ?: '8h'));
+    $expirySeconds = parseExpiryToSeconds($expiryRaw);
+    if ($expirySeconds < 300 || $expirySeconds > 604800) {
+        throw new \RuntimeException('JWT_EXPIRY must be between 5 minutes and 7 days');
+    }
+
+    return ['secret' => $secret, 'expirySeconds' => $expirySeconds];
+}
+
+function parseExpiryToSeconds(string $expiry): int
+{
+    if ($expiry === '') {
+        return 8 * 3600;
+    }
+    if (ctype_digit($expiry)) {
+        return (int) $expiry;
+    }
+    if (!preg_match('/^\s*(\d+)\s*([smhd])\s*$/i', $expiry, $matches)) {
+        return 8 * 3600;
+    }
+
+    $value = (int) $matches[1];
+    $unit = strtolower($matches[2]);
+    $multiplier = match ($unit) {
+        's' => 1,
+        'm' => 60,
+        'h' => 3600,
+        'd' => 86400,
+        default => 3600,
+    };
+
+    return $value * $multiplier;
+}
+
+function normalizeEmail(?string $email): string
+{
+    return strtolower(trim((string) $email));
+}
+
+function isStrongPassword(string $password): bool
+{
+    return strlen($password) >= 10
+        && preg_match('/[A-Z]/', $password) === 1
+        && preg_match('/[a-z]/', $password) === 1
+        && preg_match('/[0-9]/', $password) === 1
+        && preg_match('/[^A-Za-z0-9]/', $password) === 1;
+}
+
 function verifyToken(): array
 {
     $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -16,10 +71,10 @@ function verifyToken(): array
     }
 
     $token = substr($header, 7);
-    $secret = getenv('JWT_SECRET') ?: '';
+    $config = authConfig();
 
     try {
-        $decoded = JWT::decode($token, new Key($secret, 'HS256'));
+        $decoded = JWT::decode($token, new Key($config['secret'], 'HS256'));
         return (array) $decoded;
     } catch (\Throwable $exception) {
         Router::error('Invalid or expired token', 401);
@@ -54,18 +109,15 @@ function requireRoles(array $roles): array
 
 function generateToken(array $payload): string
 {
-    $secret = getenv('JWT_SECRET') ?: '';
-    $expiry = getenv('JWT_EXPIRY') ?: '8h';
+    $config = authConfig();
 
     $issuedAt = time();
-    $expiresAt = is_numeric($expiry)
-        ? $issuedAt + (int) $expiry
-        : (int) (strtotime('+' . $expiry, $issuedAt) ?: ($issuedAt + 8 * 3600));
+    $expiresAt = $issuedAt + $config['expirySeconds'];
 
     $payload['iat'] = $issuedAt;
     $payload['exp'] = $expiresAt;
 
-    return JWT::encode($payload, $secret, 'HS256');
+    return JWT::encode($payload, $config['secret'], 'HS256');
 }
 
 function logAudit(

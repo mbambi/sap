@@ -19,6 +19,8 @@ export function useCrud<T = any>({ key, endpoint, defaultParams }: UseCrudOption
   const list = useQuery({
     queryKey: [key, params],
     queryFn: () => api.get(endpoint, params),
+    placeholderData: (previousData) => previousData,
+    staleTime: 60_000,
   });
 
   const get = (id: string) =>
@@ -56,6 +58,7 @@ export function useCrud<T = any>({ key, endpoint, defaultParams }: UseCrudOption
     pagination: list.data?.pagination,
     isLoading: list.isLoading,
     error: list.error,
+    errorMessage: list.error instanceof Error ? list.error.message : null,
     page,
     setPage,
     search,

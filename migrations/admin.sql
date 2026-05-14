@@ -67,6 +67,7 @@ CREATE TABLE `WorkflowDefinition` (
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `WorkflowDefinition_tenantId_module_isActive_idx`(`tenantId`, `module`, `isActive`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -81,6 +82,7 @@ CREATE TABLE `WorkflowInstance` (
     `startedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `completedAt` DATETIME(3) NULL,
 
+    INDEX `WorkflowInstance_definitionId_status_startedAt_idx`(`definitionId`, `status`, `startedAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -97,6 +99,8 @@ CREATE TABLE `WorkflowTask` (
     `completedAt` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `WorkflowTask_assigneeId_status_createdAt_idx`(`assigneeId`, `status`, `createdAt`),
+    INDEX `WorkflowTask_instanceId_status_stepNumber_idx`(`instanceId`, `status`, `stepNumber`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -1063,4 +1067,3 @@ ALTER TABLE `StressTest` ADD CONSTRAINT `StressTest_tenantId_fkey` FOREIGN KEY (
 ALTER TABLE `UserPresence` ADD CONSTRAINT `UserPresence_tenantId_fkey` FOREIGN KEY (`tenantId`) REFERENCES `Tenant`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 SET FOREIGN_KEY_CHECKS = 1;
-

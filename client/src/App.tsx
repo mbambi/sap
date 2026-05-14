@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { useAuthStore } from "./stores/auth";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
@@ -12,18 +12,17 @@ import Customers from "./pages/finance/Customers";
 import TrialBalance from "./pages/finance/TrialBalance";
 import Materials from "./pages/materials/Materials";
 import PurchaseOrders from "./pages/materials/PurchaseOrders";
+import GoodsReceipts from "./pages/materials/GoodsReceipts";
 import Plants from "./pages/materials/Plants";
 import Inventory from "./pages/materials/Inventory";
 import SalesOrders from "./pages/sales/SalesOrders";
 import Employees from "./pages/hr/Employees";
 import LearningHub from "./pages/learning/LearningHub";
 import AdminPanel from "./pages/admin/AdminPanel";
-import ReportingDashboard from "./pages/reporting/ReportingDashboard";
 import WorkflowPage from "./pages/workflow/WorkflowPage";
 import MRPDashboard from "./pages/mrp/MRPDashboard";
 import SchedulingBoard from "./pages/production/SchedulingBoard";
 import SupplyChainNetwork from "./pages/supply-chain/SupplyChainNetwork";
-import ProcessMining from "./pages/process-mining/ProcessMining";
 import InventoryAnalytics from "./pages/inventory/InventoryAnalytics";
 import OperationsDashboard from "./pages/operations/OperationsDashboard";
 import ScenarioSimulator from "./pages/scenarios/ScenarioSimulator";
@@ -37,7 +36,6 @@ import TransportDashboard from "./pages/transport/TransportDashboard";
 import GamificationHub from "./pages/gamification/GamificationHub";
 import SandboxManager from "./pages/utilities/SandboxManager";
 import ApiPlayground from "./pages/utilities/ApiPlayground";
-import WorkflowBuilder from "./pages/workflow/WorkflowBuilder";
 import ERPCopilot from "./pages/copilot/ERPCopilot";
 import TimeMachine from "./pages/time-machine/TimeMachine";
 import SimulatorPage from "./pages/simulator/SimulatorPage";
@@ -49,8 +47,6 @@ import FinancialStatements from "./pages/FinancialStatements";
 import PeriodClosing from "./pages/PeriodClosing";
 import MrpBoard from "./pages/MrpBoard";
 import Portals from "./pages/Portals";
-import DataWarehouse from "./pages/DataWarehouse";
-import Optimization from "./pages/Optimization";
 import Integration from "./pages/Integration";
 import Documents from "./pages/Documents";
 import RoleDashboards from "./pages/RoleDashboards";
@@ -77,10 +73,8 @@ import SupplyChainGame from "./pages/game/SupplyChainGame";
 import LearningAnalytics from "./pages/learning/LearningAnalytics";
 import EventBusDashboard from "./pages/event-bus/EventBusDashboard";
 import SimulationHub from "./pages/simulation/SimulationHub";
-import ExperimentLab from "./pages/experiment-lab/ExperimentLab";
 import SupplyChainEditor from "./pages/supply-chain/SupplyChainEditor";
 import ScenarioReplay from "./pages/scenarios/ScenarioReplay";
-import RecommendationsDashboard from "./pages/copilot/RecommendationsDashboard";
 import ForecastingEngine from "./pages/supply-chain/ForecastingEngine";
 import MultiEchelonPage from "./pages/supply-chain/MultiEchelonPage";
 import {
@@ -88,6 +82,26 @@ import {
   InspectionLots, NonConformances, Equipment, WorkOrders,
   OrgUnits, LeaveRequests, TimeEntries, CostCenters, InternalOrders,
 } from "./pages/ModulePages";
+
+const ReportingDashboard = lazy(() => import("./pages/reporting/ReportingDashboard"));
+const ProcessMining = lazy(() => import("./pages/process-mining/ProcessMining"));
+const WorkflowBuilder = lazy(() => import("./pages/workflow/WorkflowBuilder"));
+const DataWarehouse = lazy(() => import("./pages/DataWarehouse"));
+const Optimization = lazy(() => import("./pages/Optimization"));
+const ExperimentLab = lazy(() => import("./pages/experiment-lab/ExperimentLab"));
+const RecommendationsDashboard = lazy(() => import("./pages/copilot/RecommendationsDashboard"));
+
+function RouteLoader() {
+  return (
+    <div className="min-h-[20rem] flex items-center justify-center">
+      <div className="animate-spin w-6 h-6 border-4 border-primary-600 border-t-transparent rounded-full" />
+    </div>
+  );
+}
+
+function LazyRoute({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<RouteLoader />}>{children}</Suspense>;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuthStore();
@@ -153,7 +167,7 @@ export default function App() {
         {/* Materials Management */}
         <Route path="/materials/items" element={<Materials />} />
         <Route path="/materials/purchase-orders" element={<PurchaseOrders />} />
-        <Route path="/materials/goods-receipts" element={<PurchaseOrders />} />
+         <Route path="/materials/goods-receipts" element={<GoodsReceipts />} />
         <Route path="/materials/inventory" element={<Inventory />} />
         <Route path="/materials/plants" element={<Plants />} />
         <Route path="/inventory/analytics" element={<InventoryAnalytics />} />
@@ -177,7 +191,7 @@ export default function App() {
         <Route path="/supply-chain/network" element={<SupplyChainNetwork />} />
 
         {/* Process Mining */}
-        <Route path="/process-mining" element={<ProcessMining />} />
+         <Route path="/process-mining" element={<LazyRoute><ProcessMining /></LazyRoute>} />
 
         {/* Scenarios */}
         <Route path="/scenarios/simulator" element={<ScenarioSimulator />} />
@@ -201,11 +215,11 @@ export default function App() {
         <Route path="/hr/time-entries" element={<RoleRoute roles={["admin","instructor"]}><TimeEntries /></RoleRoute>} />
 
         {/* Reporting */}
-        <Route path="/reporting" element={<ReportingDashboard />} />
+         <Route path="/reporting" element={<LazyRoute><ReportingDashboard /></LazyRoute>} />
 
         {/* Workflow */}
         <Route path="/workflow" element={<WorkflowPage />} />
-        <Route path="/workflow/builder" element={<WorkflowBuilder />} />
+         <Route path="/workflow/builder" element={<LazyRoute><WorkflowBuilder /></LazyRoute>} />
 
         {/* Gamification */}
         <Route path="/gamification" element={<GamificationHub />} />
@@ -237,8 +251,8 @@ export default function App() {
         <Route path="/period-closing" element={<RoleRoute roles={["admin","instructor"]}><PeriodClosing /></RoleRoute>} />
         <Route path="/mrp-board" element={<MrpBoard />} />
         <Route path="/portals" element={<RoleRoute roles={["admin","instructor"]}><Portals /></RoleRoute>} />
-        <Route path="/data-warehouse" element={<DataWarehouse />} />
-        <Route path="/optimization" element={<Optimization />} />
+         <Route path="/data-warehouse" element={<LazyRoute><DataWarehouse /></LazyRoute>} />
+         <Route path="/optimization" element={<LazyRoute><Optimization /></LazyRoute>} />
         <Route path="/integration" element={<RoleRoute roles={["admin","instructor"]}><Integration /></RoleRoute>} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/role-dashboard" element={<RoleDashboards />} />
@@ -284,10 +298,10 @@ export default function App() {
         {/* New Features */}
         <Route path="/event-bus" element={<EventBusDashboard />} />
         <Route path="/simulation" element={<SimulationHub />} />
-        <Route path="/experiment-lab" element={<ExperimentLab />} />
+         <Route path="/experiment-lab" element={<LazyRoute><ExperimentLab /></LazyRoute>} />
         <Route path="/supply-chain/editor" element={<SupplyChainEditor />} />
         <Route path="/scenario-replay" element={<ScenarioReplay />} />
-        <Route path="/recommendations" element={<RecommendationsDashboard />} />
+         <Route path="/recommendations" element={<LazyRoute><RecommendationsDashboard /></LazyRoute>} />
         <Route path="/forecasting" element={<ForecastingEngine />} />
         <Route path="/multi-echelon" element={<MultiEchelonPage />} />
       </Route>

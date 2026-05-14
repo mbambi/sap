@@ -5,12 +5,10 @@
   "description": "Web-based ERP learning platform for university students",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
+    "dev:server": "php -S localhost:8080 -t .",
     "dev:client": "cd client && npm run dev",
     "build": "cd client && npm run build",
-    "db:migrate": "cd server && npx prisma migrate dev",
-    "db:seed": "cd server && npx prisma db seed",
-    "db:studio": "cd server && npx prisma studio",
+    "db:seed": "php seed.php",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down"
   },
